@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using Meta.XR.MRUtilityKit; // MRUK namespace – ensure you have the MRUK package installed
 
@@ -13,6 +14,10 @@ public class CenterSpawnManager : MonoBehaviour
     [Header("Spawn Settings")]
     [Tooltip("Which surface type to target. For tables, choose upward-facing surfaces.")]
     private MRUK.SurfaceType targetSurface = MRUK.SurfaceType.FACING_UP;
+    
+    [Header("Cat Speed")]
+    [Tooltip("Speed in which the cats should move.")]
+    private float catSpeed = 0.05f;
 
     [Tooltip("Labels to filter the surfaces (e.g. use the Table label if available).")]
     // Replace 'Table' with the actual bit corresponding to your table label.
@@ -26,6 +31,12 @@ public class CenterSpawnManager : MonoBehaviour
 
     [Tooltip("Clearance distance to ensure nothing obstructs the spawn area.")]
     public float surfaceClearanceDistance = 0.1f;
+    
+    private float LastSpawnTime = 0;
+    
+    private float NumCats = 0;
+
+    private MRUKRoom room = null;
 
     // Called on Start – if MRUK data is available, wait for the scene to be loaded.
     private void Start()
@@ -45,7 +56,7 @@ public class CenterSpawnManager : MonoBehaviour
     // Called when the scene (room data) is loaded
     private void OnSceneLoaded()
     {
-        MRUKRoom room = MRUK.Instance.GetCurrentRoom();
+        room = MRUK.Instance.GetCurrentRoom();
         if (room != null)
         {
             SpawnOnSurface(room);
@@ -94,5 +105,21 @@ public class CenterSpawnManager : MonoBehaviour
         }
         Instantiate(spawnPrefab, position, rotation);
         Debug.Log("Spawned prefab at: " + position);
+    }
+    
+    //Spawn cats every 10 seconds that move in a consistent random direction at a set speed (catSpeed)
+    private void Update()
+    {
+        // Spawns a cat that will always try to move in a random direction until moved up by the player
+        // Logic for handling cat movement after being picked up by the player + Game-Over logic included in CatMovement.cs
+        if (Time.time - LastSpawnTime > 10)
+        {
+            LastSpawnTime = Time.time;
+            NumCats++;
+            SpawnOnSurface(room);
+        }
+        
+        //Updates the scoreboard with the number of cats spawned
+        
     }
 }

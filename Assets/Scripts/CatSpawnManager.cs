@@ -146,21 +146,21 @@ public class CenterSpawnManager : MonoBehaviour
         // Calculate the vector from the player to the center of the table
         Vector3 playerToCenter = center - playerPosition;
         // Calculate the position of the scoreboard
-        Vector3 scoreboardPositionInitial = new Vector3(center.x, center.y + ((tableHeightFromCenter - center.y) * 2), center.z) - playerToCenter.normalized * 0.5f;
+        Vector3 scoreboardPositionInitial = new Vector3(center.x, center.y + ((tableHeightFromCenter - center.y) * 2), center.z);
         // Sets the max distance from the scoreboard to the player in the x, y, and z directions
         Vector3 maxPlayerXYZDistance = new Vector3(Mathf.Abs(playerPosition.x - scoreboardPositionInitial.x), Mathf.Abs(playerPosition.y - scoreboardPositionInitial.y), Mathf.Abs(playerPosition.z - scoreboardPositionInitial.z));
         // Sets the scoreboard to be 0.5 units away from the player compared to its initial position on the axis with the largest distance from the player
         //Can position on X, -X, Z, -Z, not Y, -Y
         char largestDistanceIndex = maxPlayerXYZDistance.x > maxPlayerXYZDistance.y ? (maxPlayerXYZDistance.x > maxPlayerXYZDistance.z ? 'X' : 'Z') : (maxPlayerXYZDistance.y > maxPlayerXYZDistance.z ? 'Y' : 'Z');
         // If largest distance X, move away from the player 1f on the X axis, if Y, move away from the player 1f on the Y axis, if Z, move away from the player 1f on the Z axis, only one axis will be moved away from the player.
-        Vector3 scoreboardPosition = new Vector3(scoreboardPositionInitial.x + (largestDistanceIndex == 'X' ? (playerPosition.x > scoreboardPositionInitial.x ? -1f : 1f) : 0), scoreboardPositionInitial.y, scoreboardPositionInitial.z + (largestDistanceIndex == 'Z' ? (playerPosition.z > scoreboardPositionInitial.z ? -0.5f : 0.5f) : 0));
+        Vector3 scoreboardPosition = new Vector3(scoreboardPositionInitial.x + (largestDistanceIndex == 'X' ? (playerPosition.x > scoreboardPositionInitial.x ? -0.5f : 0.5f) : 0), scoreboardPositionInitial.y, scoreboardPositionInitial.z + (largestDistanceIndex == 'Z' ? (playerPosition.z > scoreboardPositionInitial.z ? -0.5f : 0.5f) : 0));
         //Vector3 scoreboardPosition = new Vector3(scoreboardPositionInitial.x + (maxPlayerXYZDistance.x > maxPlayerXYZDistance.y ? (playerPosition.x > scoreboardPositionInitial.x ? 0.5f : -0.5f) : 0), scoreboardPositionInitial.y + (maxPlayerXYZDistance.y > maxPlayerXYZDistance.x ? (playerPosition.y > scoreboardPositionInitial.y ? 0.5f : -0.5f) : 0), scoreboardPositionInitial.z + (maxPlayerXYZDistance.z > maxPlayerXYZDistance.y ? (playerPosition.z > scoreboardPositionInitial.z ? 0.5f : -0.5f) : 0));
         
         
         // Set the position of the scoreboard
         scoreboardCanvas.transform.position = scoreboardPosition;
-        // Rotate the scoreboard to face the center of the table
-        scoreboardCanvas.transform.LookAt(scoreboardPositionInitial);
+        // Rotate the scoreboard to face the player on only the x or y axis depending on how far the player is on each
+        scoreboardCanvas.transform.LookAt(new Vector3(largestDistanceIndex == 'X' ? playerPosition.x : scoreboardPositionInitial.x, scoreboardPositionInitial.y, largestDistanceIndex == 'Z' ? playerPosition.z : scoreboardPositionInitial.z));
         scoreboardCanvas.transform.Rotate(0, 180, 0);
     }
 

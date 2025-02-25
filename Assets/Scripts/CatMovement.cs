@@ -15,7 +15,7 @@ public class CatMovement : MonoBehaviour
         // If the cat is kinematic, do nothing.
         if (rb.isKinematic)
         {
-            return;
+            return cat.transform.position;
         }
 
         // Only move forward if the cat is nearly upright and not moving significantly downward.

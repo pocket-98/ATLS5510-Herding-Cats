@@ -33,7 +33,7 @@ public class CenterSpawnManager : MonoBehaviour
     
     private float LastSpawnTime = 0;
     
-    private float NumCats = 0;
+    private float NumCats = 1;
 
     private MRUKRoom room = null;
     
@@ -116,7 +116,7 @@ public class CenterSpawnManager : MonoBehaviour
         {
             ScoreboardTextComponent.GetComponent<TMP_Text>().SetText("Could not find room data.");
             Debug.LogWarning("No room data available from MRUK. Spawning at default position.");
-            SpawnAtPosition(Vector3.zero, Quaternion.identity);
+            //SpawnAtPosition(Vector3.zero, Quaternion.identity);
         }
         // Ensure ScoreboardText is 
         /*
@@ -135,77 +135,35 @@ public class CenterSpawnManager : MonoBehaviour
         */
     }
     
-    
+    //Positions the scoreboard on the back edge of the table from the perspective of the player, facing the center of the table.
     private void PositionScoreboard(MRUKAnchor table)
     {
-        // Retrieve the VolumeBounds of the table
-        Bounds? nullableBounds = table.VolumeBounds;
+        // Get the center of the table
+        Vector3 center = table.GetAnchorCenter();
+        float tableHeightFromCenter = room.GenerateRandomPositionOnSurface(targetSurface, 0, new LabelFilter(surfaceLabels), out Vector3 pos, out Vector3 normal) ? pos.y : 0;
+        // Get the player's position
+        Vector3 playerPosition = playerTransform.position;
+        // Calculate the vector from the player to the center of the table
+        Vector3 playerToCenter = center - playerPosition;
+        // Calculate the position of the scoreboard
+        Vector3 scoreboardPositionInitial = new Vector3(center.x, center.y + ((tableHeightFromCenter - center.y) * 2), center.z) - playerToCenter.normalized * 0.5f;
+        // Sets the max distance from the scoreboard to the player in the x, y, and z directions
+        Vector3 maxPlayerXYZDistance = new Vector3(Mathf.Abs(playerPosition.x - scoreboardPositionInitial.x), Mathf.Abs(playerPosition.y - scoreboardPositionInitial.y), Mathf.Abs(playerPosition.z - scoreboardPositionInitial.z));
+        // Sets the scoreboard to be 0.5 units away from the player compared to its initial position on the axis with the largest distance from the player
+        //Can position on X, -X, Y, -Y, Z, -Z
+        char largestDistanceIndex = maxPlayerXYZDistance.x > maxPlayerXYZDistance.y ? (maxPlayerXYZDistance.x > maxPlayerXYZDistance.z ? 'X' : 'Z') : (maxPlayerXYZDistance.y > maxPlayerXYZDistance.z ? 'Y' : 'Z');
+        // If largest distance X, move away from the player 1f on the X axis, if Y, move away from the player 1f on the Y axis, if Z, move away from the player 1f on the Z axis, only one axis will be moved away from the player.
+        Vector3 scoreboardPosition = new Vector3(scoreboardPositionInitial.x + (largestDistanceIndex == 'X' ? (playerPosition.x > scoreboardPositionInitial.x ? -1f : 1f) : 0), scoreboardPositionInitial.y + (largestDistanceIndex == 'Y' ? (playerPosition.y > scoreboardPositionInitial.y ? -1f : 1f) : 0), scoreboardPositionInitial.z + (largestDistanceIndex == 'Z' ? (playerPosition.z > scoreboardPositionInitial.z ? -0.5f : 0.5f) : 0));
+        //Vector3 scoreboardPosition = new Vector3(scoreboardPositionInitial.x + (maxPlayerXYZDistance.x > maxPlayerXYZDistance.y ? (playerPosition.x > scoreboardPositionInitial.x ? 0.5f : -0.5f) : 0), scoreboardPositionInitial.y + (maxPlayerXYZDistance.y > maxPlayerXYZDistance.x ? (playerPosition.y > scoreboardPositionInitial.y ? 0.5f : -0.5f) : 0), scoreboardPositionInitial.z + (maxPlayerXYZDistance.z > maxPlayerXYZDistance.y ? (playerPosition.z > scoreboardPositionInitial.z ? 0.5f : -0.5f) : 0));
         
-        if (nullableBounds.HasValue)
-        {
-            Bounds tableBounds = nullableBounds.Value;
-            // Calculate the corners of the table based on the bounds
-            Vector3 tableCenter = tableBounds.center;
-            Vector3 tableExtents = tableBounds.size;
-            
-            float minRadius = 0.0f; // For surface placement, can be set to zero
-            LabelFilter filter = new LabelFilter(surfaceLabels);
-            if (room.GenerateRandomPositionOnSurface(targetSurface, minRadius, filter, out Vector3 pos,
-                    out Vector3 normal))
-            {
-                Vector3 playerPosition = playerTransform.position;
-                Vector3 extents = tableBounds.extents;
-
-// Define the corners of the table's top face
-                Vector3[] topCorners = new Vector3[4];
-                topCorners[0] = tableCenter + new Vector3(extents.x, extents.y, extents.z);  // Front-Right
-                topCorners[1] = tableCenter + new Vector3(-extents.x, extents.y, extents.z); // Front-Left
-                topCorners[2] = tableCenter + new Vector3(extents.x, extents.y, -extents.z); // Back-Right
-                topCorners[3] = tableCenter + new Vector3(-extents.x, extents.y, -extents.z);// Back-Left
-
-// Determine the furthest edge from the player
-                Vector3 furthestCorner1 = topCorners[0];
-                Vector3 furthestCorner2 = topCorners[1];
-                float maxDistance = 0f;
-
-                for (int i = 0; i < topCorners.Length; i++)
-                {
-                    for (int j = i + 1; j < topCorners.Length; j++)
-                    {
-                        float distance = (topCorners[i] - playerPosition).sqrMagnitude + (topCorners[j] - playerPosition).sqrMagnitude;
-                        if (distance > maxDistance)
-                        {
-                            maxDistance = distance;
-                            furthestCorner1 = topCorners[i];
-                            furthestCorner2 = topCorners[j];
-                        }
-                    }
-                }
-
-                Vector3 furthestEdgeCenter = (furthestCorner1 + furthestCorner2) / 2;
-
-                // Offset the scoreboard above the furthest corner
-                Vector3 scoreboardPosition = furthestEdgeCenter + new Vector3(0, 0.2f, 0); // Adjust the Y offset as needed
-
-                // Instantiate the ScoreboardText at the calculated position
-
-                scoreboardCanvas.transform.position = scoreboardPosition;
-
-                // Optionally, adjust the rotation to face the player
-                scoreboardCanvas.transform.LookAt(new Vector3(playerPosition.x, scoreboardCanvas.transform.position.y,
-                    playerPosition.z));
-                scoreboardCanvas.transform.Rotate(0, 180, 0); // Rotate to face the player
-            }
-        }
-        else
-        {
-            Debug.LogWarning("Table VolumeBounds is null.");
-            // Handle the null case appropriately
-        }
         
-
-        
+        // Set the position of the scoreboard
+        scoreboardCanvas.transform.position = scoreboardPosition;
+        // Rotate the scoreboard to face the center of the table
+        scoreboardCanvas.transform.LookAt(scoreboardPositionInitial);
+        scoreboardCanvas.transform.Rotate(0, 180, 0);
     }
+
 
 
     // Uses the room’s GenerateRandomPositionOnSurface method to get a position on a surface
@@ -267,7 +225,15 @@ public class CenterSpawnManager : MonoBehaviour
         //Moves the cats
         foreach (GameObject cat in cats)
         {
-            CatMovement.MoveCat(cat);
+            Vector3 newCatPosition = CatMovement.MoveCat(cat);
+            if (newCatPosition.y < -10)
+            {
+                Destroy(cat);
+                cats.Remove(cat);
+                ScoreboardTextComponent.GetComponent<TMP_Text>().SetText("Game Over! You spawned " + NumCats + " cats.");
+                LastSpawnTime = Time.time;
+                NumCats = 0;
+            }
         }
         // Update the scoreboard text
         if (ScoreboardTextComponent.GetComponent<TMP_Text>() != null)

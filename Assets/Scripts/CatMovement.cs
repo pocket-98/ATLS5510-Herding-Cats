@@ -7,7 +7,7 @@ public class CatMovement : MonoBehaviour
     static float downwardThreshold = -0.5f;  // Threshold to decide if the cat is moving downward
     static float uprightAngleThreshold = 10f; // Maximum allowed deviation (in degrees) from upright
     
-    public static void MoveCat(GameObject cat)
+    public static Vector3 MoveCat(GameObject cat)
     {
         Rigidbody rb = cat.GetComponent<Rigidbody>();
         rb.WakeUp();
@@ -26,6 +26,7 @@ public class CatMovement : MonoBehaviour
 
         // Keep the cat upright regardless of movement direction.
         KeepUpright(cat, rb);
+        return cat.transform.position;
     }
 
     static void MoveForward(GameObject cat, Rigidbody rb)

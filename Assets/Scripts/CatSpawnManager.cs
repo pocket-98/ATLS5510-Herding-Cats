@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
-using Meta.XR.MRUtilityKit; // MRUK namespace – ensure you have the MRUK package installed
+using Meta.XR.MRUtilityKit;
+using Oculus.Interaction; // MRUK namespace – ensure you have the MRUK package installed
 
 /// <summary>
 /// Spawns a prefab at the “center” of a table (or any upward-facing surface that meets a given label filter)
@@ -60,6 +61,26 @@ public class CenterSpawnManager : MonoBehaviour
         if (room != null)
         {
             SpawnOnSurface(room);
+            //Generates surface plane rigidbody on the top surface for the cats to move on
+            MRUKAnchor table = room.FindLargestSurface(surfaceLabels);
+            if (table != null)
+            {
+                Rigidbody2D rb;
+                if(!table.gameObject.GetComponent<Rigidbody2D>())
+                {
+                    rb = table.gameObject.AddComponent<Rigidbody2D>();
+                    //rb.useGravity = false;
+                    rb.isKinematic = true;
+                    //rb.LockKinematic();
+                    
+                }
+                Collider2D col;
+                if(!table.gameObject.GetComponent<BoxCollider2D>())
+                {
+                    col = table.gameObject.AddComponent<BoxCollider2D>();
+                }
+                
+            }
         }
         else
         {
@@ -84,6 +105,7 @@ public class CenterSpawnManager : MonoBehaviour
             {
                 //Find center of surface
                 Vector3 center = table.GetAnchorCenter();
+                
                 Vector3 tableSurfaceCenter = new Vector3(center.x, pos.y + baseOffset, center.z);
                 SpawnAtPosition(tableSurfaceCenter, Quaternion.identity);
             }

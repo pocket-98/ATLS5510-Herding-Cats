@@ -225,20 +225,26 @@ public class CenterSpawnManager : MonoBehaviour
         //Moves the cats
         foreach (GameObject cat in cats)
         {
+            // Update the scoreboard text
+            if (ScoreboardTextComponent.GetComponent<TMP_Text>() != null)
+            {
+                ScoreboardTextComponent.GetComponent<TMP_Text>().SetText($"Score: (Cats Spawned): {NumCats}");
+            }
+            // Move the cat
             Vector3 newCatPosition = CatMovement.MoveCat(cat);
+            // Destroy the cat if it falls below the table, Set Game Over Logic.
             if (newCatPosition.y < -10)
             {
-                Destroy(cat);
+                foreach (GameObject c in cats)
+                {
+                    Destroy(c);
+                }
                 cats.Remove(cat);
-                ScoreboardTextComponent.GetComponent<TMP_Text>().SetText("Game Over! You spawned " + NumCats + " cats.");
+                cats.Clear();
+                ScoreboardTextComponent.GetComponent<TMP_Text>().SetText("Game Over! You managed " + NumCats + " cats.");
                 LastSpawnTime = Time.time;
                 NumCats = 0;
             }
-        }
-        // Update the scoreboard text
-        if (ScoreboardTextComponent.GetComponent<TMP_Text>() != null)
-        {
-            ScoreboardTextComponent.GetComponent<TMP_Text>().SetText($"Score: (Cats Spawned): {NumCats}");
         }
         
     }

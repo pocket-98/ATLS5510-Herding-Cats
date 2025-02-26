@@ -31,9 +31,9 @@ In our VR game, Herding Cats, cats continuously appear on a table and begin craw
 ```
 Felines are causing havoc! Race against your opponents to round up four-of-a-kind. But don’t let the cat out the bag! Bring fun, excitement and lightning reflexes to your next gathering with Herding Cats, the fast-paced card grabbing game.
 ```
+
+
 <img width=600 src="cardgame.png"/>
-
-
 
 ## 3. Implementation
 
@@ -53,6 +53,12 @@ Specifically for modeling the cat, Blender was used to create a cat model. This 
 
 For creating the environment for the game, custom scripts had to be made to determine the largest surface for which to then add rigid body, collision, and physics to. Also the player's 3D position had to be captured to allow for the scoreboard to appear in the correct position to be viewed while playing. Controlling the cats ragdoll physics also required some custom scripts for handling rotation and movement as the cats were potentially picked up and placed back on the table. The cat's had autonomy when spawned to walk towards the edge of the table which tied into the mechanism for ending the game when the player could no longer stop the cats from walking over the edge.
 
+There were a few major issues when coding that we had to resolve, the first was having issues getting the physics of the table, as there is no default way to add a properly scaled rigidbody to a Anchor in Meta's Building Blocks, but through manually adding a rigidbody and a collider, then adjusting them manually and locking them in place, we were able to create the surface for the cats to walk on.
+
+<img width=600 src="testTableVR.png"/>
+
+All the concepts used are simple in theory, but it took over 12 hours of just debugging to get it all to work properly.
+
 ## 4. Future Work
 
 There are different areas where the game could be improved. More animation states could be added such as a pick up animation. There were problems with importing the rigging from Blender into Unity, so approaching this in a more compatible way would be ideal.
@@ -60,5 +66,3 @@ There are different areas where the game could be improved. More animation state
 For the gameplay itself, there is room to improve on the walking logic for the cats and also to add in a dedicated start and menu screen for difficulty settings to be able to control the rate of cats spawning and the speed at which they walk. The game could also be improved by adding a timer to the game to make it more competitive and challenging.
 
 The game AI for cat behavior could be iterated upon to determine which direction of walking would make the game the most difficult for the player. There is also the possiblity of making the game multiplayer allowing for multiple people to try to manage all of the cats or maybe having a mechanism where the goal is to have as many cats on one player's side of the table before the time runs out.
-
-

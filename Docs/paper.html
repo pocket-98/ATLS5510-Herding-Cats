@@ -92,6 +92,16 @@ cats were potentially picked up and placed back on the table. The cat's
 had autonomy when spawned to walk towards the edge of the table which
 tied into the mechanism for ending the game when the player could no
 longer stop the cats from walking over the edge.</p>
+<p>There were a few major issues when coding that we had to resolve, the
+first was having issues getting the physics of the table, as there is no
+default way to add a properly scaled rigidbody to a Anchor in Meta's
+Building Blocks, but through manually adding a rigidbody and a collider,
+then adjusting them manually and locking them in place, we were able to
+create the surface for the cats to walk on.</p>
+<img width=600 src="testTableVR.png"/>
+
+<p>All the concepts used are simple in theory, but it took over 12 hours
+of just debugging to get it all to work properly.</p>
 <h2 id="4-future-work">4. Future Work</h2>
 <p>There are different areas where the game could be improved. More
 animation states could be added such as a pick up animation. There were
